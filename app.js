@@ -172,6 +172,7 @@ canvas.addEventListener('pointermove', (e) => {
     dragNow = c;
     draw();
   }
+  e.preventDefault();
 });
 
 function finalizeSelection(e) {
@@ -188,6 +189,7 @@ function finalizeSelection(e) {
   }
   dragStart = dragNow = null; draw();
   activePointerId = null;
+  e.preventDefault();
 }
 
 canvas.addEventListener('pointerup', finalizeSelection);
@@ -197,6 +199,7 @@ canvas.addEventListener('pointercancel', (e) => {
   dragStart = dragNow = null;
   activePointerId = null;
   draw();
+  e.preventDefault();
 });
 
 // iOS 구형 Safari 등 pointer 이벤트가 불완전한 환경을 위한 touch 폴백
@@ -254,6 +257,51 @@ canvas.addEventListener(
   },
   { passive: false }
 );
+
+canvas.addEventListener(
+  'touchcancel',
+  (e) => {
+    dragStart = dragNow = null;
+    activePointerId = null;
+    draw();
+    e.preventDefault();
+  },
+  { passive: false }
+);
+
+// 삼성 인터넷 일부 환경 대비 마우스 폴백(포인터 이벤트 미동작 시)
+if (!window.PointerEvent) {
+  canvas.addEventListener('mousedown', (e) => {
+    if (!started || paused) return;
+    const p = canvasPosFromClient(e.clientX, e.clientY);
+    dragStart = toCell(p.x, p.y);
+    dragNow = dragStart;
+    draw();
+  });
+  canvas.addEventListener('mousemove', (e) => {
+    if (!dragStart || !started || paused) return;
+    const p = canvasPosFromClient(e.clientX, e.clientY);
+    const c = toCell(p.x, p.y);
+    if (c) {
+      dragNow = c;
+      draw();
+    }
+  });
+  window.addEventListener('mouseup', (e) => {
+    if (!dragStart || !started || paused) return;
+    const p = canvasPosFromClient(e.clientX, e.clientY);
+    const c = toCell(p.x, p.y);
+    if (c) dragNow = c;
+    const { sum, cells } = sumAndCells();
+    if (cells.length && sum === 10) {
+      for (const [r, cc] of cells) grid[r][cc] = null;
+      score += 10;
+      if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
+    }
+    dragStart = dragNow = null;
+    draw();
+  });
+}
 
 document.getElementById('startBtn').onclick = startGame;
 document.getElementById('resetBtn').onclick = () => { if (started) resetBoard(); };
