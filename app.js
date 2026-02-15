@@ -144,11 +144,20 @@ function startGame() {
   clearInterval(timerId); timerId = setInterval(tick, 1000);
 }
 
+function canvasPosFromClient(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((clientX - rect.left) * canvas.width) / rect.width,
+    y: ((clientY - rect.top) * canvas.height) / rect.height,
+  };
+}
+
 canvas.addEventListener('pointerdown', (e) => {
   if (!started || paused) return;
   activePointerId = e.pointerId;
   canvas.setPointerCapture(e.pointerId);
-  dragStart = toCell(e.offsetX, e.offsetY);
+  const p = canvasPosFromClient(e.clientX, e.clientY);
+  dragStart = toCell(p.x, p.y);
   dragNow = dragStart;
   draw();
 });
@@ -156,7 +165,8 @@ canvas.addEventListener('pointerdown', (e) => {
 canvas.addEventListener('pointermove', (e) => {
   if (!dragStart || !started || paused) return;
   if (activePointerId !== e.pointerId) return;
-  const c = toCell(e.offsetX, e.offsetY);
+  const p = canvasPosFromClient(e.clientX, e.clientY);
+  const c = toCell(p.x, p.y);
   if (c) {
     dragNow = c;
     draw();
@@ -166,7 +176,8 @@ canvas.addEventListener('pointermove', (e) => {
 function finalizeSelection(e) {
   if (!dragStart || !started || paused) return;
   if (activePointerId !== e.pointerId) return;
-  const c = toCell(e.offsetX, e.offsetY);
+  const p = canvasPosFromClient(e.clientX, e.clientY);
+  const c = toCell(p.x, p.y);
   if (c) dragNow = c;
   const { sum, cells } = sumAndCells();
   if (cells.length && sum === 10) {
@@ -185,6 +196,62 @@ canvas.addEventListener('pointercancel', (e) => {
   activePointerId = null;
   draw();
 });
+
+// iOS 구형 Safari 등 pointer 이벤트가 불완전한 환경을 위한 touch 폴백
+canvas.addEventListener(
+  'touchstart',
+  (e) => {
+    if (!started || paused) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const p = canvasPosFromClient(t.clientX, t.clientY);
+    dragStart = toCell(p.x, p.y);
+    dragNow = dragStart;
+    draw();
+    e.preventDefault();
+  },
+  { passive: false }
+);
+
+canvas.addEventListener(
+  'touchmove',
+  (e) => {
+    if (!dragStart || !started || paused) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const p = canvasPosFromClient(t.clientX, t.clientY);
+    const c = toCell(p.x, p.y);
+    if (c) {
+      dragNow = c;
+      draw();
+    }
+    e.preventDefault();
+  },
+  { passive: false }
+);
+
+canvas.addEventListener(
+  'touchend',
+  (e) => {
+    if (!dragStart || !started || paused) return;
+    const t = e.changedTouches[0];
+    if (t) {
+      const p = canvasPosFromClient(t.clientX, t.clientY);
+      const c = toCell(p.x, p.y);
+      if (c) dragNow = c;
+    }
+    const { sum, cells } = sumAndCells();
+    if (cells.length && sum === 10) {
+      for (const [r, cc] of cells) grid[r][cc] = null;
+      score += 10;
+      if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
+    }
+    dragStart = dragNow = null;
+    draw();
+    e.preventDefault();
+  },
+  { passive: false }
+);
 
 document.getElementById('startBtn').onclick = startGame;
 document.getElementById('resetBtn').onclick = () => { if (started) resetBoard(); };
