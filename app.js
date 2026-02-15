@@ -74,20 +74,8 @@ function strokeRoundedRect(x, y, w, h, r, color, lineWidth = 2) {
   ctx.stroke();
 }
 
-function removeSelectedAndRefill(cells) {
+function removeSelected(cells) {
   for (const [r, c] of cells) grid[r][c] = null;
-
-  // 빈칸이 남지 않도록 아래로 당기고, 위에서 새 숫자를 채운다.
-  for (let c = 0; c < cols; c++) {
-    const values = [];
-    for (let r = rows - 1; r >= 0; r--) {
-      if (grid[r][c] != null) values.push(grid[r][c]);
-    }
-    while (values.length < rows) values.push(rand1to9());
-    for (let r = rows - 1, i = 0; r >= 0; r--, i++) {
-      grid[r][c] = values[i];
-    }
-  }
 }
 
 function drawApple(x, y, v) {
@@ -229,7 +217,7 @@ function finalizeSelection(e) {
   if (c) dragNow = c;
   const { sum, cells } = sumAndCells();
   if (cells.length && sum === 10) {
-    removeSelectedAndRefill(cells);
+    removeSelected(cells);
     score += 10;
     if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
   }
@@ -304,7 +292,7 @@ canvas.addEventListener(
     }
     const { sum, cells } = sumAndCells();
     if (cells.length && sum === 10) {
-      removeSelectedAndRefill(cells);
+      removeSelected(cells);
       score += 10;
       if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
     }
@@ -352,7 +340,7 @@ if (!window.PointerEvent) {
     if (c) dragNow = c;
     const { sum, cells } = sumAndCells();
     if (cells.length && sum === 10) {
-      removeSelectedAndRefill(cells);
+      removeSelected(cells);
       score += 10;
       if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
     }
