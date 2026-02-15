@@ -20,6 +20,7 @@ let dragStart = null;
 let dragNow = null;
 let lightMode = true;
 let activePointerId = null;
+let multiTouchMode = false;
 
 function rand1to9() { return Math.floor(Math.random() * 9) + 1; }
 function initGrid() { grid = Array.from({ length: rows }, () => Array.from({ length: cols }, rand1to9)); }
@@ -197,6 +198,7 @@ function canvasPosFromClient(clientX, clientY) {
 }
 
 canvas.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') return;
   if (!started || paused) return;
   activePointerId = e.pointerId;
   try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
@@ -204,10 +206,10 @@ canvas.addEventListener('pointerdown', (e) => {
   dragStart = toCell(p.x, p.y);
   dragNow = dragStart;
   draw();
-  e.preventDefault();
 });
 
 canvas.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'touch') return;
   if (!dragStart || !started || paused) return;
   if (activePointerId !== e.pointerId) return;
   const p = canvasPosFromClient(e.clientX, e.clientY);
@@ -216,10 +218,10 @@ canvas.addEventListener('pointermove', (e) => {
     dragNow = c;
     draw();
   }
-  e.preventDefault();
 });
 
 function finalizeSelection(e) {
+  if (e.pointerType === 'touch') return;
   if (!dragStart || !started || paused) return;
   if (activePointerId !== e.pointerId) return;
   const p = canvasPosFromClient(e.clientX, e.clientY);
@@ -233,17 +235,16 @@ function finalizeSelection(e) {
   }
   dragStart = dragNow = null; draw();
   activePointerId = null;
-  e.preventDefault();
 }
 
 canvas.addEventListener('pointerup', finalizeSelection);
 window.addEventListener('pointerup', finalizeSelection);
 canvas.addEventListener('pointercancel', (e) => {
+  if (e.pointerType === 'touch') return;
   if (activePointerId !== e.pointerId) return;
   dragStart = dragNow = null;
   activePointerId = null;
   draw();
-  e.preventDefault();
 });
 
 // iOS 구형 Safari 등 pointer 이벤트가 불완전한 환경을 위한 touch 폴백
@@ -251,6 +252,13 @@ canvas.addEventListener(
   'touchstart',
   (e) => {
     if (!started || paused) return;
+    if (e.touches.length >= 2) {
+      multiTouchMode = true;
+      dragStart = dragNow = null;
+      draw();
+      return;
+    }
+    multiTouchMode = false;
     const t = e.changedTouches[0];
     if (!t) return;
     const p = canvasPosFromClient(t.clientX, t.clientY);
@@ -266,6 +274,7 @@ canvas.addEventListener(
   'touchmove',
   (e) => {
     if (!dragStart || !started || paused) return;
+    if (multiTouchMode || e.touches.length >= 2) return;
     const t = e.changedTouches[0];
     if (!t) return;
     const p = canvasPosFromClient(t.clientX, t.clientY);
@@ -283,6 +292,10 @@ canvas.addEventListener(
   'touchend',
   (e) => {
     if (!dragStart || !started || paused) return;
+    if (multiTouchMode) {
+      if (e.touches.length === 0) multiTouchMode = false;
+      return;
+    }
     const t = e.changedTouches[0];
     if (t) {
       const p = canvasPosFromClient(t.clientX, t.clientY);
@@ -307,6 +320,7 @@ canvas.addEventListener(
   (e) => {
     dragStart = dragNow = null;
     activePointerId = null;
+    multiTouchMode = false;
     draw();
     e.preventDefault();
   },
