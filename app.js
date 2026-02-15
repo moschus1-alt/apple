@@ -155,11 +155,12 @@ function canvasPosFromClient(clientX, clientY) {
 canvas.addEventListener('pointerdown', (e) => {
   if (!started || paused) return;
   activePointerId = e.pointerId;
-  canvas.setPointerCapture(e.pointerId);
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
   const p = canvasPosFromClient(e.clientX, e.clientY);
   dragStart = toCell(p.x, p.y);
   dragNow = dragStart;
   draw();
+  e.preventDefault();
 });
 
 canvas.addEventListener('pointermove', (e) => {
@@ -190,6 +191,7 @@ function finalizeSelection(e) {
 }
 
 canvas.addEventListener('pointerup', finalizeSelection);
+window.addEventListener('pointerup', finalizeSelection);
 canvas.addEventListener('pointercancel', (e) => {
   if (activePointerId !== e.pointerId) return;
   dragStart = dragNow = null;
