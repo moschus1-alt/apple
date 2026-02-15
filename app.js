@@ -8,6 +8,8 @@ const scoreEl = document.getElementById('score');
 const timeEl = document.getElementById('time');
 const rankBody = document.getElementById('rankBody');
 const overlay = document.getElementById('startOverlay');
+const overlayTextEl = document.querySelector('.overlay-text');
+const overlayStartBtn = document.getElementById('overlayStartBtn');
 const bgm = document.getElementById('bgm');
 
 let grid = [];
@@ -156,7 +158,7 @@ function endGame(reason) {
     renderRanks();
   }
   overlay.style.display = 'flex';
-  overlay.textContent = 'START 버튼을 눌러 시작';
+  overlayTextEl.textContent = 'START 버튼을 눌러 시작';
 }
 
 function tick() {
@@ -350,6 +352,7 @@ if (!window.PointerEvent) {
 }
 
 document.getElementById('startBtn').onclick = startGame;
+overlayStartBtn.onclick = startGame;
 document.getElementById('resetBtn').onclick = () => { if (started) resetBoard(); };
 document.getElementById('pauseBtn').onclick = () => {
   if (!started) return;
@@ -358,7 +361,7 @@ document.getElementById('pauseBtn').onclick = () => {
   if (paused) {
     bgm.pause();
     overlay.style.display = 'flex';
-    overlay.textContent = '일시정지';
+    overlayTextEl.textContent = '일시정지';
   } else {
     overlay.style.display = 'none';
     if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
