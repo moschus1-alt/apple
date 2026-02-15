@@ -23,6 +23,7 @@ let dragNow = null;
 let lightMode = true;
 let activePointerId = null;
 let multiTouchMode = false;
+const RANK_STORAGE_KEY = 'apple_rankings';
 
 function rand1to9() { return Math.floor(Math.random() * 9) + 1; }
 function initGrid() { grid = Array.from({ length: rows }, () => Array.from({ length: cols }, rand1to9)); }
@@ -145,20 +146,22 @@ function draw() {
 
 function endGame(reason) {
   started = false;
+  paused = false;
+  document.getElementById('pauseBtn').textContent = '일시정지';
   clearInterval(timerId);
   timerId = null;
   bgm.pause(); bgm.currentTime = 0;
   const name = prompt(`게임 종료: ${reason}\n점수 ${score}점 기록 이름 입력`, 'Player');
   if (name !== null) {
-    const key = 'apple_rankings';
-    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    const arr = loadRanks();
     arr.push({ name: (name.trim() || 'Player').slice(0, 20), score, time: new Date().toISOString() });
     arr.sort((a,b)=>b.score-a.score);
-    localStorage.setItem(key, JSON.stringify(arr.slice(0,10)));
+    saveRanks(arr.slice(0, 10));
     renderRanks();
   }
   overlay.style.display = 'flex';
   overlayTextEl.textContent = 'START 버튼을 눌러 시작';
+  overlayStartBtn.textContent = 'Start';
 }
 
 function tick() {
@@ -175,8 +178,25 @@ function resetBoard() {
 function startGame() {
   started = true; paused = false; resetBoard();
   overlay.style.display = 'none';
+  overlayStartBtn.textContent = 'Start';
   if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
   clearInterval(timerId); timerId = setInterval(tick, 1000);
+}
+
+function resumeGame() {
+  if (!started || !paused) return;
+  paused = false;
+  document.getElementById('pauseBtn').textContent = '일시정지';
+  overlay.style.display = 'none';
+  if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
+}
+
+function handleStartAction() {
+  if (started && paused) {
+    resumeGame();
+    return;
+  }
+  if (!started) startGame();
 }
 
 function canvasPosFromClient(clientX, clientY) {
@@ -351,8 +371,8 @@ if (!window.PointerEvent) {
   });
 }
 
-document.getElementById('startBtn').onclick = startGame;
-overlayStartBtn.onclick = startGame;
+document.getElementById('startBtn').onclick = handleStartAction;
+overlayStartBtn.onclick = handleStartAction;
 document.getElementById('resetBtn').onclick = () => { if (started) resetBoard(); };
 document.getElementById('pauseBtn').onclick = () => {
   if (!started) return;
@@ -362,11 +382,26 @@ document.getElementById('pauseBtn').onclick = () => {
     bgm.pause();
     overlay.style.display = 'flex';
     overlayTextEl.textContent = '일시정지';
+    overlayStartBtn.textContent = '재개';
   } else {
     overlay.style.display = 'none';
+    overlayStartBtn.textContent = 'Start';
     if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
   }
 };
+
+function loadRanks() {
+  try {
+    const data = JSON.parse(localStorage.getItem(RANK_STORAGE_KEY) || '[]');
+    return Array.isArray(data) ? data : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function saveRanks(ranks) {
+  localStorage.setItem(RANK_STORAGE_KEY, JSON.stringify(ranks));
+}
 
 document.getElementById('lightToggle').onchange = (e) => { lightMode = e.target.checked; draw(); };
 document.getElementById('bgmToggle').onchange = (e) => {
@@ -376,7 +411,7 @@ document.getElementById('bgmToggle').onchange = (e) => {
 };
 
 function renderRanks() {
-  const arr = JSON.parse(localStorage.getItem('apple_rankings') || '[]');
+  const arr = loadRanks();
   rankBody.innerHTML = '';
   if (!arr.length) {
     rankBody.innerHTML = '<tr><td>-</td><td>기록 없음</td><td>-</td></tr>';
