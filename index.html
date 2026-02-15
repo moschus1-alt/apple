@@ -18,16 +18,17 @@
 
     <div class="content">
       <div class="game-wrap">
-        <canvas id="game" width="760" height="470"></canvas>
-        <div id="startOverlay" class="overlay">
-          <div class="overlay-card">
-            <div class="overlay-text">START 버튼을 눌러 시작</div>
-            <button id="overlayStartBtn" class="overlay-start-btn">Start</button>
+        <div class="canvas-wrap">
+          <canvas id="game" width="760" height="470"></canvas>
+          <div id="startOverlay" class="overlay">
+            <div class="overlay-card">
+              <div class="overlay-text">START 버튼을 눌러 시작</div>
+              <button id="overlayStartBtn" class="overlay-start-btn">Start</button>
+            </div>
           </div>
         </div>
 
         <div class="controls in-frame">
-          <button id="startBtn">Start</button>
           <button id="resetBtn">Reset</button>
           <button id="pauseBtn">일시정지</button>
           <label><input id="lightToggle" type="checkbox" checked /> Light Colors</label>

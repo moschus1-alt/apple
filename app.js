@@ -176,7 +176,10 @@ function resetBoard() {
 }
 
 function startGame() {
-  started = true; paused = false; resetBoard();
+  started = true;
+  paused = false;
+  document.getElementById('pauseBtn').textContent = '일시정지';
+  resetBoard();
   overlay.style.display = 'none';
   overlayStartBtn.textContent = 'Start';
   if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
@@ -185,10 +188,7 @@ function startGame() {
 
 function resumeGame() {
   if (!started || !paused) return;
-  paused = false;
-  document.getElementById('pauseBtn').textContent = '일시정지';
-  overlay.style.display = 'none';
-  if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
+  setPaused(false);
 }
 
 function handleStartAction() {
@@ -197,6 +197,28 @@ function handleStartAction() {
     return;
   }
   if (!started) startGame();
+}
+
+function setPaused(nextPaused) {
+  if (!started) return;
+  paused = nextPaused;
+  document.getElementById('pauseBtn').textContent = paused ? '재개' : '일시정지';
+
+  if (paused) {
+    dragStart = null;
+    dragNow = null;
+    activePointerId = null;
+    bgm.pause();
+    overlay.style.display = 'flex';
+    overlayTextEl.textContent = '일시정지';
+    overlayStartBtn.textContent = '재개';
+    draw();
+    return;
+  }
+
+  overlay.style.display = 'none';
+  overlayStartBtn.textContent = 'Start';
+  if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
 }
 
 function canvasPosFromClient(clientX, clientY) {
@@ -371,23 +393,15 @@ if (!window.PointerEvent) {
   });
 }
 
-document.getElementById('startBtn').onclick = handleStartAction;
 overlayStartBtn.onclick = handleStartAction;
-document.getElementById('resetBtn').onclick = () => { if (started) resetBoard(); };
+document.getElementById('resetBtn').onclick = () => {
+  if (!started) return;
+  if (paused) setPaused(false);
+  resetBoard();
+};
 document.getElementById('pauseBtn').onclick = () => {
   if (!started) return;
-  paused = !paused;
-  document.getElementById('pauseBtn').textContent = paused ? '재개' : '일시정지';
-  if (paused) {
-    bgm.pause();
-    overlay.style.display = 'flex';
-    overlayTextEl.textContent = '일시정지';
-    overlayStartBtn.textContent = '재개';
-  } else {
-    overlay.style.display = 'none';
-    overlayStartBtn.textContent = 'Start';
-    if (document.getElementById('bgmToggle').checked) bgm.play().catch(()=>{});
-  }
+  setPaused(!paused);
 };
 
 function loadRanks() {
