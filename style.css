@@ -1,0 +1,22 @@
+﻿:root { --bg:#0f172a; --panel:#111827; --accent:#22c55e; --text:#e5e7eb; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: 'Segoe UI', sans-serif; background: radial-gradient(circle at 20% 10%, #1e293b, #0b1020 60%); color: var(--text); }
+.app { max-width: 1180px; margin: 20px auto; padding: 16px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+h1 { margin:0; font-size: 26px; }
+.hud { display:flex; gap:18px; font-weight:700; }
+#time { color:#4ade80; }
+.content { display:flex; gap:14px; }
+.game-wrap { position:relative; background:#16a34a; border-radius:18px; padding:12px; box-shadow: 0 12px 24px rgba(0,0,0,.35); }
+canvas { display:block; background:#b7efc5; border-radius:10px; }
+.overlay { position:absolute; inset:12px; background: rgba(8, 24, 44, .58); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px; border-radius:10px; }
+.rank { width:320px; background: var(--panel); border-radius:12px; overflow:hidden; box-shadow: 0 10px 22px rgba(0,0,0,.3); }
+.rank h2 { margin:0; padding:12px; background: var(--accent); color:#052e16; }
+.rank table { width:100%; border-collapse: collapse; }
+.rank th, .rank td { padding:8px 10px; border-bottom:1px solid #243244; font-size:14px; }
+.rank th { text-align:left; color:#a7f3d0; }
+.rank td:last-child, .rank th:last-child { text-align:right; }
+.controls { margin-top:12px; display:flex; gap:10px; align-items:center; }
+button { background:#334155; border:0; color:#fff; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; }
+button:first-child { background:#22c55e; color:#052e16; }
+label { color:#cbd5e1; font-weight:700; }

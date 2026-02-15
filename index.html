@@ -1,0 +1,47 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apple Box Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <h1>Apple Box</h1>
+      <div class="hud">
+        <span id="score">SCORE 0</span>
+        <span id="time">120</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="game-wrap">
+        <canvas id="game" width="760" height="470"></canvas>
+        <div id="startOverlay" class="overlay">START 버튼을 눌러 시작</div>
+      </div>
+
+      <aside class="rank">
+        <h2>TOP 10 랭킹</h2>
+        <table>
+          <thead><tr><th>순위</th><th>이름</th><th>점수</th></tr></thead>
+          <tbody id="rankBody"></tbody>
+        </table>
+      </aside>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">Start</button>
+      <button id="resetBtn">Reset</button>
+      <button id="pauseBtn">일시정지</button>
+      <label><input id="lightToggle" type="checkbox" checked /> Light Colors</label>
+      <label><input id="bgmToggle" type="checkbox" checked /> BGM</label>
+    </div>
+
+    <audio id="bgm" src="assets/bgm.wav" loop></audio>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
