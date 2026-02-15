@@ -19,6 +19,7 @@ let timerId = null;
 let dragStart = null;
 let dragNow = null;
 let lightMode = true;
+let activePointerId = null;
 
 function rand1to9() { return Math.floor(Math.random() * 9) + 1; }
 function initGrid() { grid = Array.from({ length: rows }, () => Array.from({ length: cols }, rand1to9)); }
@@ -143,11 +144,30 @@ function startGame() {
   clearInterval(timerId); timerId = setInterval(tick, 1000);
 }
 
-canvas.addEventListener('mousedown', (e) => { if (!started || paused) return; dragStart = toCell(e.offsetX, e.offsetY); dragNow = dragStart; draw(); });
-canvas.addEventListener('mousemove', (e) => { if (!dragStart || !started || paused) return; const c = toCell(e.offsetX, e.offsetY); if (c) { dragNow = c; draw(); } });
-canvas.addEventListener('mouseup', (e) => {
+canvas.addEventListener('pointerdown', (e) => {
+  if (!started || paused) return;
+  activePointerId = e.pointerId;
+  canvas.setPointerCapture(e.pointerId);
+  dragStart = toCell(e.offsetX, e.offsetY);
+  dragNow = dragStart;
+  draw();
+});
+
+canvas.addEventListener('pointermove', (e) => {
   if (!dragStart || !started || paused) return;
-  const c = toCell(e.offsetX, e.offsetY); if (c) dragNow = c;
+  if (activePointerId !== e.pointerId) return;
+  const c = toCell(e.offsetX, e.offsetY);
+  if (c) {
+    dragNow = c;
+    draw();
+  }
+});
+
+function finalizeSelection(e) {
+  if (!dragStart || !started || paused) return;
+  if (activePointerId !== e.pointerId) return;
+  const c = toCell(e.offsetX, e.offsetY);
+  if (c) dragNow = c;
   const { sum, cells } = sumAndCells();
   if (cells.length && sum === 10) {
     for (const [r, cc] of cells) grid[r][cc] = null;
@@ -155,6 +175,15 @@ canvas.addEventListener('mouseup', (e) => {
     if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
   }
   dragStart = dragNow = null; draw();
+  activePointerId = null;
+}
+
+canvas.addEventListener('pointerup', finalizeSelection);
+canvas.addEventListener('pointercancel', (e) => {
+  if (activePointerId !== e.pointerId) return;
+  dragStart = dragNow = null;
+  activePointerId = null;
+  draw();
 });
 
 document.getElementById('startBtn').onclick = startGame;

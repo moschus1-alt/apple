@@ -8,7 +8,7 @@ h1 { margin:0; font-size: 26px; }
 #time { color:#4ade80; }
 .content { display:flex; gap:14px; }
 .game-wrap { position:relative; background:#16a34a; border-radius:18px; padding:12px; box-shadow: 0 12px 24px rgba(0,0,0,.35); }
-canvas { display:block; background:#b7efc5; border-radius:10px; }
+canvas { display:block; background:#b7efc5; border-radius:10px; touch-action: none; }
 .overlay { position:absolute; inset:12px; background: rgba(8, 24, 44, .58); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px; border-radius:10px; }
 .rank { width:320px; background: var(--panel); border-radius:12px; overflow:hidden; box-shadow: 0 10px 22px rgba(0,0,0,.3); }
 .rank h2 { margin:0; padding:12px; background: var(--accent); color:#052e16; }
