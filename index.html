@@ -20,6 +20,14 @@
       <div class="game-wrap">
         <canvas id="game" width="760" height="470"></canvas>
         <div id="startOverlay" class="overlay">START 버튼을 눌러 시작</div>
+
+        <div class="controls in-frame">
+          <button id="startBtn">Start</button>
+          <button id="resetBtn">Reset</button>
+          <button id="pauseBtn">일시정지</button>
+          <label><input id="lightToggle" type="checkbox" checked /> Light Colors</label>
+          <label><input id="bgmToggle" type="checkbox" checked /> BGM</label>
+        </div>
       </div>
 
       <aside class="rank">
@@ -29,14 +37,6 @@
           <tbody id="rankBody"></tbody>
         </table>
       </aside>
-    </div>
-
-    <div class="controls">
-      <button id="startBtn">Start</button>
-      <button id="resetBtn">Reset</button>
-      <button id="pauseBtn">일시정지</button>
-      <label><input id="lightToggle" type="checkbox" checked /> Light Colors</label>
-      <label><input id="bgmToggle" type="checkbox" checked /> BGM</label>
     </div>
 
     <audio id="bgm" src="assets/bgm.wav" loop></audio>

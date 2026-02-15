@@ -17,6 +17,7 @@ canvas { display:block; width:100%; height:auto; aspect-ratio:760/470; backgroun
 .rank th { text-align:left; color:#a7f3d0; }
 .rank td:last-child, .rank th:last-child { text-align:right; }
 .controls { margin-top:12px; display:flex; gap:10px; align-items:center; }
+.controls.in-frame { margin-top:10px; padding:8px; border-radius:10px; background: rgba(7, 26, 18, 0.28); flex-wrap: wrap; }
 button { background:#334155; border:0; color:#fff; padding:8px 14px; border-radius:8px; font-weight:700; cursor:pointer; }
 button:first-child { background:#22c55e; color:#052e16; }
 label { color:#cbd5e1; font-weight:700; }
