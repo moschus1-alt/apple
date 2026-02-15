@@ -55,6 +55,40 @@ function hasPossibleTen() {
   return false;
 }
 
+function strokeRoundedRect(x, y, w, h, r, color, lineWidth = 2) {
+  const rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.lineTo(x + w - rr, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+  ctx.lineTo(x + w, y + h - rr);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+  ctx.lineTo(x + rr, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+  ctx.lineTo(x, y + rr);
+  ctx.quadraticCurveTo(x, y, x + rr, y);
+  ctx.closePath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.stroke();
+}
+
+function removeSelectedAndRefill(cells) {
+  for (const [r, c] of cells) grid[r][c] = null;
+
+  // 빈칸이 남지 않도록 아래로 당기고, 위에서 새 숫자를 채운다.
+  for (let c = 0; c < cols; c++) {
+    const values = [];
+    for (let r = rows - 1; r >= 0; r--) {
+      if (grid[r][c] != null) values.push(grid[r][c]);
+    }
+    while (values.length < rows) values.push(rand1to9());
+    for (let r = rows - 1, i = 0; r >= 0; r--, i++) {
+      grid[r][c] = values[i];
+    }
+  }
+}
+
 function drawApple(x, y, v) {
   const m = 6, x1 = x + m, y1 = y + m, x2 = x + cell - m, y2 = y + cell - m;
   ctx.fillStyle = lightMode ? '#ff4a3d' : '#ef3f33';
@@ -90,10 +124,20 @@ function draw() {
 
   if (dragStart && dragNow) {
     const [r1,r2,c1,c2] = selRange();
-    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
-    for (let r=r1;r<=r2;r++) for (let c=c1;c<=c2;c++) ctx.strokeRect(boardX+c*cell+1, boardY+r*cell+1, cell-2, cell-2);
-    ctx.lineWidth = 3;
-    ctx.strokeRect(boardX + c1*cell+2, boardY + r1*cell+2, (c2-c1+1)*cell-4, (r2-r1+1)*cell-4);
+    for (let r = r1; r <= r2; r++) {
+      for (let c = c1; c <= c2; c++) {
+        strokeRoundedRect(boardX + c * cell + 2, boardY + r * cell + 2, cell - 4, cell - 4, 6, '#7dd3fc', 2);
+      }
+    }
+    strokeRoundedRect(
+      boardX + c1 * cell + 2,
+      boardY + r1 * cell + 2,
+      (c2 - c1 + 1) * cell - 4,
+      (r2 - r1 + 1) * cell - 4,
+      10,
+      '#38bdf8',
+      3
+    );
   }
 
   const ratio = timeLeft / 120;
@@ -183,7 +227,7 @@ function finalizeSelection(e) {
   if (c) dragNow = c;
   const { sum, cells } = sumAndCells();
   if (cells.length && sum === 10) {
-    for (const [r, cc] of cells) grid[r][cc] = null;
+    removeSelectedAndRefill(cells);
     score += 10;
     if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
   }
@@ -247,7 +291,7 @@ canvas.addEventListener(
     }
     const { sum, cells } = sumAndCells();
     if (cells.length && sum === 10) {
-      for (const [r, cc] of cells) grid[r][cc] = null;
+      removeSelectedAndRefill(cells);
       score += 10;
       if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
     }
@@ -294,7 +338,7 @@ if (!window.PointerEvent) {
     if (c) dragNow = c;
     const { sum, cells } = sumAndCells();
     if (cells.length && sum === 10) {
-      for (const [r, cc] of cells) grid[r][cc] = null;
+      removeSelectedAndRefill(cells);
       score += 10;
       if (!hasPossibleTen()) endGame('더 이상 10을 만들 수 없음');
     }
